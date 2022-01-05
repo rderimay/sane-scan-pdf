@@ -73,7 +73,7 @@ process_page() {
 
   if [[ $OPTIMIZE_IMAGE == 1 ]]; then
     #runconstrained $TIMEVERBOSE convert -enhance -level 6%,76% $IMAGE_PATH $IMAGE_PATH | logstdout
-    runconstrained $TIMEVERBOSE convert -level 4%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
+    runconstrained $TIMEVERBOSE convert -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
     log "Applying optimization script to image data..."
   fi
 
