@@ -73,12 +73,12 @@ process_page() {
 
   if [[ $OPTIMIZE_IMAGE == 1 ]]; then
     #runconstrained $TIMEVERBOSE convert -enhance -level 6%,76% $IMAGE_PATH $IMAGE_PATH | logstdout
-    runconstrained $TIMEVERBOSE convert -level 4%,92% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
+    runconstrained $TIMEVERBOSE convert -level 4%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
     log "Applying optimization script to image data..."
   fi
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -shave 2%x2% -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
+    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -shave 4%x4% -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
     log "$IMAGE_PATH has $PERCENTAGE_WHITE % white"
   else
     PERCENTAGE_WHITE=0
