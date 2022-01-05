@@ -31,6 +31,7 @@ DESKEW=0
 DRIVER_OPTION=
 VERBOSE=0
 SKIP_EMPTY_PAGES=0
+OPTIMIZE_IMAGE=0
 SOURCE=""
 
 TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
@@ -85,6 +86,8 @@ while [[ $# > 0 ]]; do
   --language) shift; LANGUAGE=$1 ;;
 
   --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
+
+  --optimize-image) OPTIMIZE_IMAGE=1 ;;
 
   -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
 
@@ -145,6 +148,8 @@ if [[ $HELP == 1 ]]; then
   echo "   which language to use for OCR"
   echo " --skip-empty-pages"
   echo "   remove empty pages from resulting PDF document (e.g. one sided doc in duplex mode)"
+  echo " --optimize-image"
+  echo "   Tries to get a cleaner image"
   echo ""
   echo "OUTPUT"
   echo " -o, --output <outputfile>"
@@ -267,6 +272,7 @@ export PGWIDTHIN
 export PGHEIGHTIN
 export PS2PDF_OPTS
 export SKIP_EMPTY_PAGES
+export OPTIMIZE_IMAGE
 
 if [[ $VERBOSE == 1 ]]; then
   LOCKFILE=$(mktemp)

@@ -14,6 +14,7 @@ usage()
   echo "  PGWIDTHIN"
   echo "  PGHEIGHTIN"
   echo "  SKIP_EMPTY_PAGES"
+  echo "  OPTIMIZE_IMAGE"
   echo "  PS2PDF_OPTS (optional)"
   echo "  VERBOSE (optional)"
   echo "  LOCKFILE (required if VERBOSE=1)"
@@ -50,7 +51,7 @@ if [[ $# < 1 ]]; then
   exit 1
 fi
 
-if [[ "$UNPAPER" == "" || "$SEARCHABLE" == "" || "$RESOLUTION" == "" || "$RESOLUTION" == "" || "$SKIP_EMPTY_PAGES" == "" ]]; then
+if [[ "$UNPAPER" == "" || "$SEARCHABLE" == "" || "$RESOLUTION" == "" || "$RESOLUTION" == "" || "$SKIP_EMPTY_PAGES" == "" || "$OPTIMIZE_IMAGE" == "" ]]; then
   usage
   exit 1
 fi
@@ -61,17 +62,23 @@ IMAGE_FILE=$(basename $1)
 
 TIMEVERBOSE=
 if [[ $VERBOSE == 1 ]]; then
-  TIMEVERBOSE=time
+  TIMEVERBOSE=	#time
 fi
 
 process_page() {
   log ""
   log "-------------------------------------------------------------------------------"
-  log "Post-processing scanned page ${IMAGE_PATH}, deskew=$UNPAPER, searchable=$SEARCHABLE, skip-empty-pages=$SKIP_EMPTY_PAGES..."
+  log "Post-processing scanned page ${IMAGE_PATH}, deskew=$UNPAPER, searchable=$SEARCHABLE, skip-empty-pages=$SKIP_EMPTY_PAGES, optimize_image=$OPTIMIZE_IMAGE..."
   log "-------------------------------------------------------------------------------"
 
+  if [[ $OPTIMIZE_IMAGE == 1 ]]; then
+    #runconstrained $TIMEVERBOSE convert -enhance -level 6%,76% $IMAGE_PATH $IMAGE_PATH | logstdout
+    runconstrained $TIMEVERBOSE convert -level 4%,92% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
+    log "Applying optimization script to image data..."
+  fi
+
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
+    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -shave 2%x2% -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
     log "$IMAGE_PATH has $PERCENTAGE_WHITE % white"
   else
     PERCENTAGE_WHITE=0
@@ -113,9 +120,9 @@ process_page() {
       log "...Running pnmtops on $IMAGE_DIR/$PP_PREFIX$IMAGE_FILE using page options: $PAGEOPTS"
       runconstrained $TIMEVERBOSE pnmtops $PNMVERBOSE $PAGEOPTS $IMAGE_DIR/$PP_PREFIX$IMAGE_FILE > $IMAGE_DIR/${IMAGE_FILE}.ps | logstdout
       log "...Running ps2pdf on $IMAGE_DIR/${IMAGE_FILE}.ps"
-      runconstrained $TIMEVERBOSE ps2pdf $PS2PDF_OPTS $IMAGE_DIR/${IMAGE_FILE}.ps $IMAGE_DIR/${IMAGE_FILE}.pdf | logstdout
+      runconstrained $TIMEVERBOSE ps2pdf14 $PS2PDF_OPTS $IMAGE_DIR/${IMAGE_FILE}.ps $IMAGE_DIR/${IMAGE_FILE}.pdf | logstdout
       [[ -f $IMAGE_DIR/${IMAGE_FILE}.ps ]] && rm $IMAGE_DIR/$PP_PREFIX${IMAGE_FILE}.ps
-    fi    
+    fi
   fi
 
   status=$?
