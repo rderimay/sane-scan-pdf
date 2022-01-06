@@ -14,7 +14,7 @@ usage()
   echo "  PGWIDTHIN"
   echo "  PGHEIGHTIN"
   echo "  SKIP_EMPTY_PAGES"
-  echo "  OPTIMIZE_IMAGES"
+  echo "  OPTIMIZE_IMAGES (optional, STD ou FULL)"
   echo "  PS2PDF_OPTS (optional)"
   echo "  VERBOSE (optional)"
   echo "  LOCKFILE (required if VERBOSE=1)"
@@ -73,12 +73,12 @@ process_page() {
 
   if [[ "$OPTIMIZE_IMAGES" == "STD" ]]; then
     runconstrained $TIMEVERBOSE convert -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
-    log "Applying optimization script $OPTIMIZE_IMAGE to image data..."
+    log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
   fi
 
-  if [[ "$OPTIMIZE_IMAGE" == "FULL" ]]; then
+  if [[ "$OPTIMIZE_IMAGES" == "FULL" ]]; then
     runconstrained $TIMEVERBOSE convert \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH $IMAGE_PATH | logstdout
-    log "Applying optimization script $OPTIMIZE_IMAGE to image data..."
+    log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
   fi
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
