@@ -71,12 +71,12 @@ process_page() {
   log "Post-processing scanned page ${IMAGE_PATH}, deskew=$UNPAPER, searchable=$SEARCHABLE, skip-empty-pages=$SKIP_EMPTY_PAGES, optimize_images=$OPTIMIZE_IMAGES..."
   log "-------------------------------------------------------------------------------"
 
-  if [[ $OPTIMIZE_IMAGES == "STD" ]]; then
+  if [[ "$OPTIMIZE_IMAGES" == "STD" ]]; then
     runconstrained $TIMEVERBOSE convert -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
     log "Applying optimization script $OPTIMIZE_IMAGE to image data..."
   fi
 
-  if [[ $OPTIMIZE_IMAGE == "FULL" ]]; then
+  if [[ "$OPTIMIZE_IMAGE" == "FULL" ]]; then
     runconstrained $TIMEVERBOSE convert \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH $IMAGE_PATH | logstdout
     log "Applying optimization script $OPTIMIZE_IMAGE to image data..."
   fi
