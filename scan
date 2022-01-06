@@ -31,7 +31,8 @@ DESKEW=0
 DRIVER_OPTION=
 VERBOSE=0
 SKIP_EMPTY_PAGES=0
-OPTIMIZE_IMAGE=0
+OPTIMIZE_IMAGES=0
+FULL_OPTIMIZATION=0
 SOURCE=""
 
 TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
@@ -87,7 +88,9 @@ while [[ $# > 0 ]]; do
 
   --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
 
-  --optimize-image) OPTIMIZE_IMAGE=1 ;;
+  --optimize-images) OPTIMIZE_IMAGES=1 ;;
+
+  --full-optimization) FULL_OPTIMIZATION=1 ;;
 
   -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
 
@@ -145,12 +148,14 @@ if [[ $HELP == 1 ]]; then
   echo " --ocr"
   echo "   Run OCR to make the PDF searchable (requires tesseract)"
   echo " --language <lang>"
-  echo "   which language to use for OCR"
+  echo "   Which language to use for OCR"
   echo " --skip-empty-pages"
-  echo "   remove empty pages from resulting PDF document (e.g. one sided doc in duplex mode)"
-  echo " --optimize-image"
-  echo "   Tries to get a cleaner image"
-  echo ""
+  echo "   Remove empty pages from resulting PDF document (e.g. one sided doc in duplex mode)"
+  echo " --optimize-images"
+  echo "   Runs an ImageMagick optimization script that should produce cleaner scans. "
+  echo "   The optimization is done before `--skip-empty-image` is evaluated, meaning it should also help removing unneeded pages."
+  echo " --full-optimization"
+  echo "   Uses another, more agressive, algorithm to clean up the images"
   echo "OUTPUT"
   echo " -o, --output <outputfile>"
   echo "   Output to named file default=scan.pdf"
@@ -263,6 +268,17 @@ if [[ $SKIP_EMPTY_PAGES == 1 && ! -x "$(command -v bc)" ]]; then
   SKIP_EMPTY_PAGES=0
 fi
 
+if [[ $OPTIMIZE_IMAGES == 1 ]]; then
+    OPTIMIZE_IMAGES = "STD"
+    if [[ $FULL_OPTIMIZATION == 1 ]]; then
+        OPTIMIZE_IMAGES = "FULL"
+    fi
+else
+    if [[ $FULL_OPTIMIZATION == 1 ]]; then
+        echo >&2 'Warning: `--full-optimization` specified, without `--optimize-images`. No optimization will be done.'
+    fi
+fi
+
 export VERBOSE
 export UNPAPER
 export SEARCHABLE
@@ -272,7 +288,7 @@ export PGWIDTHIN
 export PGHEIGHTIN
 export PS2PDF_OPTS
 export SKIP_EMPTY_PAGES
-export OPTIMIZE_IMAGE
+export OPTIMIZE_IMAGES
 
 if [[ $VERBOSE == 1 ]]; then
   LOCKFILE=$(mktemp)

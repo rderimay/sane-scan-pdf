@@ -14,7 +14,7 @@ usage()
   echo "  PGWIDTHIN"
   echo "  PGHEIGHTIN"
   echo "  SKIP_EMPTY_PAGES"
-  echo "  OPTIMIZE_IMAGE"
+  echo "  OPTIMIZE_IMAGES"
   echo "  PS2PDF_OPTS (optional)"
   echo "  VERBOSE (optional)"
   echo "  LOCKFILE (required if VERBOSE=1)"
@@ -51,7 +51,7 @@ if [[ $# < 1 ]]; then
   exit 1
 fi
 
-if [[ "$UNPAPER" == "" || "$SEARCHABLE" == "" || "$RESOLUTION" == "" || "$RESOLUTION" == "" || "$SKIP_EMPTY_PAGES" == "" || "$OPTIMIZE_IMAGE" == "" ]]; then
+if [[ "$UNPAPER" == "" || "$SEARCHABLE" == "" || "$RESOLUTION" == "" || "$RESOLUTION" == "" || "$SKIP_EMPTY_PAGES" == "" || ("$OPTIMIZE_IMAGES" != "STD" && "$OPTIMIZE_IMAGES" != "FULL") ]]; then
   usage
   exit 1
 fi
@@ -68,13 +68,17 @@ fi
 process_page() {
   log ""
   log "-------------------------------------------------------------------------------"
-  log "Post-processing scanned page ${IMAGE_PATH}, deskew=$UNPAPER, searchable=$SEARCHABLE, skip-empty-pages=$SKIP_EMPTY_PAGES, optimize_image=$OPTIMIZE_IMAGE..."
+  log "Post-processing scanned page ${IMAGE_PATH}, deskew=$UNPAPER, searchable=$SEARCHABLE, skip-empty-pages=$SKIP_EMPTY_PAGES, optimize_images=$OPTIMIZE_IMAGES..."
   log "-------------------------------------------------------------------------------"
 
-  if [[ $OPTIMIZE_IMAGE == 1 ]]; then
-    #runconstrained $TIMEVERBOSE convert -enhance -level 6%,76% $IMAGE_PATH $IMAGE_PATH | logstdout
+  if [[ $OPTIMIZE_IMAGES == "STD" ]]; then
     runconstrained $TIMEVERBOSE convert -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH $IMAGE_PATH | logstdout
-    log "Applying optimization script to image data..."
+    log "Applying optimization script $OPTIMIZE_IMAGE to image data..."
+  fi
+
+  if [[ $OPTIMIZE_IMAGE == "FULL" ]]; then
+    runconstrained $TIMEVERBOSE convert \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH $IMAGE_PATH | logstdout
+    log "Applying optimization script $OPTIMIZE_IMAGE to image data..."
   fi
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
