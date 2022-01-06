@@ -269,9 +269,9 @@ if [[ $SKIP_EMPTY_PAGES == 1 && ! -x "$(command -v bc)" ]]; then
 fi
 
 if [[ $OPTIMIZE_IMAGES == 1 ]]; then
-    OPTIMIZE_IMAGES = "STD"
+    OPTIMIZE_IMAGES="STD"
     if [[ $FULL_OPTIMIZATION == 1 ]]; then
-        OPTIMIZE_IMAGES = "FULL"
+        OPTIMIZE_IMAGES="FULL"
     fi
 else
     if [[ $FULL_OPTIMIZATION == 1 ]]; then
