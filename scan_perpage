@@ -72,13 +72,13 @@ process_page() {
   log "-------------------------------------------------------------------------------"
 
   if [[ "$OPTIMIZE_IMAGES" == "STD" ]]; then
-    runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
     log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
+    runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
   fi
 
   if [[ "$OPTIMIZE_IMAGES" == "FULL" ]]; then
-    runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH $IMAGE_PATH | logstdout
     log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
+    runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH $IMAGE_PATH | logstdout
   fi
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
