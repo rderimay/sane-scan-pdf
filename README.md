@@ -81,9 +81,11 @@ OPTIONS
    Run OCR to make the PDF searchable (requires tesseract and ImageMagick)
  --skip-empty-pages
    Remove empty pages from resulting PDF document (e.g. one sided doc in duplex mode)
- --optimize-image
-   Runs an ImageMagick optimization script that produces cleaner scans.
-   It runs before `--skip-empty-image` is evaluated, so it should also help removing unneeded pages.
+ --optimize-images
+   Runs an ImageMagick optimization script that should produce cleaner scans.
+   The optimization is done before `--skip-empty-image` is evaluated, meaning it should also help removing unneeded pages.
+ --full-optimization
+   Uses another, more agressive, algorithm to clean up the images
 
 OUTPUT
  -o, --output <outputfile>

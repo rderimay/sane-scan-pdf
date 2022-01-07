@@ -62,7 +62,7 @@ IMAGE_FILE=$(basename $1)
 
 TIMEVERBOSE=
 if [[ $VERBOSE == 1 ]]; then
-  TIMEVERBOSE=	#time
+  TIMEVERBOSE=time
 fi
 
 process_page() {
@@ -71,27 +71,27 @@ process_page() {
   log "Post-processing scanned page ${IMAGE_PATH}, deskew=$UNPAPER, searchable=$SEARCHABLE, skip-empty-pages=$SKIP_EMPTY_PAGES, optimize_images=$OPTIMIZE_IMAGES..."
   log "-------------------------------------------------------------------------------"
 
-  if [[ "$OPTIMIZE_IMAGES" == "STD" ]]; then
-    log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
-    runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
-  fi
-
-  if [[ "$OPTIMIZE_IMAGES" == "FULL" ]]; then
-    log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
-    runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
-  fi
-
+  PP_PREFIX=
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -shave 4%x4% -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
+    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% \( +clone -lat ${RESOLUTION/5}x${RESOLUTION/5}-10% -threshold 96% \) -compose lighten -composite -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
     log "$IMAGE_PATH has $PERCENTAGE_WHITE % white"
   else
     PERCENTAGE_WHITE=0
   fi
 
-  PP_PREFIX=
   if [[ $SKIP_EMPTY_PAGES == 1 && $(echo "$PERCENTAGE_WHITE > 99.8" | bc -l) == 1 ]]; then
     log "Skipping empty page $IMAGE_FILE with white percentage $PERCENTAGE_WHITE"
   else
+    if [[ "$OPTIMIZE_IMAGES" == "STD" ]]; then
+      log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
+    fi
+
+    if [[ "$OPTIMIZE_IMAGES" == "FULL" ]]; then
+      log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
+    fi
+
     if [[ $UNPAPER == 1 ]]; then
       log "Applying unpaper post-processing to image data..."
       PP_PREFIX="unpaper-"
