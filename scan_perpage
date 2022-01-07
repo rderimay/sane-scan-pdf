@@ -14,7 +14,7 @@ usage()
   echo "  PGWIDTHIN"
   echo "  PGHEIGHTIN"
   echo "  SKIP_EMPTY_PAGES"
-  echo "  OPTIMIZE_IMAGES (optional, STD ou FULL)"
+  echo "  OPTIMIZE_IMAGES (NONE, STD or FULL)"
   echo "  PS2PDF_OPTS (optional)"
   echo "  VERBOSE (optional)"
   echo "  LOCKFILE (required if VERBOSE=1)"
@@ -51,7 +51,7 @@ if [[ $# < 1 ]]; then
   exit 1
 fi
 
-if [[ "$UNPAPER" == "" || "$SEARCHABLE" == "" || "$RESOLUTION" == "" || "$RESOLUTION" == "" || "$SKIP_EMPTY_PAGES" == "" || ("$OPTIMIZE_IMAGES" != "STD" && "$OPTIMIZE_IMAGES" != "FULL") ]]; then
+if [[ "$UNPAPER" == "" || "$SEARCHABLE" == "" || "$RESOLUTION" == "" || "$RESOLUTION" == "" || "$SKIP_EMPTY_PAGES" == "" || ("$OPTIMIZE_IMAGES" != "NONE" && "$OPTIMIZE_IMAGES" != "STD" && "$OPTIMIZE_IMAGES" != "FULL") ]]; then
   usage
   exit 1
 fi

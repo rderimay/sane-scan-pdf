@@ -274,6 +274,7 @@ if [[ $OPTIMIZE_IMAGES == 1 ]]; then
         OPTIMIZE_IMAGES="FULL"
     fi
 else
+    OPTIMIZE_IMAGES="NONE"
     if [[ $FULL_OPTIMIZATION == 1 ]]; then
         echo >&2 'Warning: `--full-optimization` specified, without `--optimize-images`. No optimization will be done.'
     fi
