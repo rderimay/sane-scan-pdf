@@ -82,10 +82,9 @@ OPTIONS
  --skip-empty-pages
    Remove empty pages from resulting PDF document (e.g. one sided doc in duplex mode)
  --optimize-images
-   Runs an ImageMagick optimization script that should produce cleaner scans.
-   The optimization is done before `--skip-empty-image` is evaluated, meaning it should also help removing unneeded pages.
+   Runs an ImageMagick optimization script that should produce cleaner scans. 
  --full-optimization
-   Uses another, more agressive, algorithm to clean up the images
+   Uses another, more agressive, algorithm to clean up the images. It produces excellent results when dealing with documents but will tend to destroy contained photos. 
 
 OUTPUT
  -o, --output <outputfile>
