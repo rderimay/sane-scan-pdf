@@ -40,8 +40,8 @@ runconstrained()
 {
   if [[ -x "$(command -v sem)" ]]; then
     # use up to 75% of the cores available
-    arg=$@ | sed 's/\\/\\\\/g'  # Replacing \ with \\, otherwise the following will fail
-    sem --jobs 75% --id scan_perpage --fg "arg"
+    arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
+    sem --jobs 75% --id scan_perpage --fg "$arg"
   else
     "$@"
   fi
