@@ -12,7 +12,8 @@ RESOLUTION=300
 MODE=Lineart
 MODE_CHANGED=0
 MODE_HW_DEFAULT=0
-SCRIPT="$DIR/scan_perpage"
+PREPROCESS_SCRIPT="$DIR/scan_page_preprocess"
+POSTPROCESS_SCRIPT="$DIR/scan_page_postprocess"
 DUPLEX=0
 UNPAPER=0
 SEARCHABLE=0
@@ -280,15 +281,8 @@ else
 fi
 
 export VERBOSE
-export UNPAPER
-export SEARCHABLE
-export LANGUAGE
 export RESOLUTION
-export PGWIDTHIN
-export PGHEIGHTIN
-export PS2PDF_OPTS
 export SKIP_EMPTY_PAGES
-export OPTIMIZE_IMAGES
 
 if [[ $VERBOSE == 1 ]]; then
   LOCKFILE=$(mktemp)
@@ -304,9 +298,40 @@ else
   MODE="--mode '$MODE'"
 fi
 [ -e "$SCANPRE" ] && . "$SCANPRE"
-eval scanadf -d \'"$DEVICE"\' $MAXPAGE $PGHEIGHT $PGWIDTH -S $SCRIPT --script-wait $DESKEW $CROP $DRIVER_OPTION $SOURCE --resolution $RESOLUTION $MODE -o $TMP_DIR/scan-%04d
+eval scanadf -d \'"$DEVICE"\' $MAXPAGE $PGHEIGHT $PGWIDTH -S $PREPROCESS_SCRIPT --script-wait $DESKEW $CROP $DRIVER_OPTION $SOURCE --resolution $RESOLUTION $MODE -o $TMP_DIR/scan-%04d
 # Simulate empty page scanner outputs for debugging
 #convert xc:none -page Letter $TMP_DIR/scan-0001.pdf
+
+shopt -s extglob nullglob
+pngfiles=($TMP_DIR/scan-[0-9]*.png)
+numscans=${#pngfiles[@]}
+
+if (( numscans == 0 )); then
+  echo "No scan found."
+else
+  echo "Post-processing $numscans pages"
+
+  if (( TRUNCPAGE > 0 )); then
+    truncpage=$TRUNCPAGE
+    if (( numscans < TRUNCPAGE )); then
+      truncpage=$numscans
+    fi
+    for x in ${pngfiles[@]:$numscans-$truncpage:$truncpage}; do rm "$x"; done;
+    pngfiles=(${pngfiles[@]:0:$numscans-$truncpage})
+
+    let "numscans = numscans - truncpage"
+
+    echo "Truncated $truncpage pages."
+  fi
+  if (( numscans <= 0 )); then
+    echo "No scan remaining."
+    exit 0
+  fi
+fi
+
+mv $TMP_DIR/scan-0*.png "$OUTPUT"
+
+exit 0
 
 shopt -s extglob nullglob
 pdffiles=($TMP_DIR/scan-[0-9]*.pdf)
