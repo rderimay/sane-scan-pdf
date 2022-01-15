@@ -282,7 +282,8 @@ eval scanadf -d \'"$DEVICE"\' $MAXPAGE $PGHEIGHT $PGWIDTH $DESKEW $CROP $DRIVER_
 # Simulate empty page scanner outputs for debugging
 #convert xc:none -page Letter $TMP_DIR/scan-0001.pdf
 
-params="--resolution=$RESOLUTION"
+params="--resolution $RESOLUTION"
+
 if [[ $VERBOSE == 1 ]]; then
   params="$params --verbose"
 fi
@@ -292,7 +293,7 @@ if [[ $UNPAPER == 1 ]]; then
 fi
 
 if [[ $SEARCHABLE == 1 ]]; then
-  params="$params --searchable --language=$LANGUAGE"
+  params="$params --searchable --language $LANGUAGE"
 fi
 
 if [[ $SKIP_EMPTY_PAGES == 1 && ! -x "$(command -v bc)" ]]; then
@@ -306,9 +307,9 @@ fi
 
 if [[ $OPTIMIZE_IMAGES == 1 ]]; then
   if [[ $FULL_OPTIMIZATION == 1 ]]; then
-    params="$params --optimization=full"
+    params="$params --optimization full"
   else
-    params="$params --optimization=std"
+    params="$params --optimization std"
   fi
 else
   if [[ $FULL_OPTIMIZATION == 1 ]]; then
@@ -317,15 +318,15 @@ else
 fi
 
 if [[ "$PGWIDTHIN" != "" ]]; then
-  params="$params --page-width=\"$PGWIDTHIN\""
+  params="$params --page-width \"$PGWIDTHIN\""
 fi
 
 if [[ "$PGHEIGHTIN" != "" ]]; then
-  params="$params --page-height=\"$PGHEIGHTIN\""
+  params="$params --page-height \"$PGHEIGHTIN\""
 fi
 
 if [[ "$PS2PDF_OPTS" != "" ]]; then
-  params="$params --ps2pdf-opts=\"$PS2PDF_OPTS\""
+  params="$params --ps2pdf-opts \"$PS2PDF_OPTS\""
 fi
 
-eval $SCRIPT $params --input-dir="$TMP_DIR" --output="$OUTPUT"
+eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
