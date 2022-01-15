@@ -39,7 +39,7 @@ SOURCE=""
 TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
 cleanup()
 {
-  rm -rf "$TMP_DIR"
+  echo "CLEANUP CANCELED !!!!!!!!!!!!!" # rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
 
@@ -334,11 +334,11 @@ fi
 numscans=${#pngfiles[@]}
 echo "Post-processing $numscans pages…"
 
-for x in ${pdffiles[@]:0:$numscans}
+for x in ${pngfiles[@]}
 do
     echo "$x"
     eval $POSTPROCESS_SCRIPT --optimize-images --full-optimization "$x"
-done;
+done
 
 exit 0
 
