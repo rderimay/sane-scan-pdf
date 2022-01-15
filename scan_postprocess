@@ -1,0 +1,65 @@
+#!/bin/bash
+
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+RESOLUTION=300
+POSTPROCESS_SCRIPT="$DIR/scan_page_postprocess"
+VERBOSE=0
+SEARCHABLE=0
+LANGUAGE=eng
+SKIP_EMPTY_PAGES=0
+OPTIMIZE_IMAGES=0
+FULL_OPTIMIZATION=0
+SOURCE=""
+
+TMP_DIR=/home/pi/scans # $(mktemp -d -p "" scan.XXXXXXXXXX)
+cleanup()
+{
+  echo "CLEANUP CANCELED !!!!!!!!!!!!!" # rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+# Parse command-line options
+while [[ $# > 1 ]]; do
+  case "$1" in
+
+  -v|--verbose) VERBOSE=1 ;;
+
+  -r|--resolution) shift; RESOLUTION=$1 ;;
+
+  --searchable|--ocr) SEARCHABLE=1 ;;
+
+  --language) shift; LANGUAGE=$1 ;;
+
+  --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
+
+  --optimize-images) OPTIMIZE_IMAGES=1 ;;
+
+  --full-optimization) FULL_OPTIMIZATION=1 ;;
+
+  *) echo >&2 "Unknown argument: $1"; exit 1; fi ;;
+
+  esac
+  shift   # next option
+done
+
+$TMP_DIR = $1
+
+if [[ $VERBOSE == 1 ]]; then
+  LOCKFILE=$(mktemp)
+  trap "cleanup; rm -rf $LOCKFILE" EXIT
+  export LOCKFILE
+fi;
+
+shopt -s extglob nullglob
+ppmfiles=($TMP_DIR/scan-[0-9]*)
+numscans=${#ppmfiles[@]}
+
+echo "Post-processing $numscans pages…"
+
+for x in ${ppmfiles[@]}
+do
+    eval $POSTPROCESS_SCRIPT --verbose --optimize-images --full-optimization "$x"
+done
+
+exit 0
