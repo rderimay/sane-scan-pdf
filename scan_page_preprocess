@@ -78,7 +78,7 @@ process_page() {
 
   else
     log "Keeping page and converting to png"
-    runconstrained $TIMEVERBOSE convert -density ${RESOLUTION}x${RESOLUTION} -units PixelsPerInch $IMAGE_PATH $IMAGE_PATH.png | logstdout
+    runconstrained $TIMEVERBOSE convert -density ${RESOLUTION}x${RESOLUTION} -units PixelsPerInch -type TrueColor -ColorSpace sRGB -quality 80 $IMAGE_PATH $IMAGE_PATH.png | logstdout
   fi
 
   status=$?

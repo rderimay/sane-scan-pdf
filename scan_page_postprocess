@@ -1,0 +1,56 @@
+#!/bin/bash
+
+VERBOSE=0
+RESOLUTION=300
+OPTIMIZE_IMAGES=0
+FULL_OPTIMIZATION=0
+
+# Parse command-line options
+while [[ $# > 0 ]]; do
+  case "$1" in
+
+  -v|--verbose) VERBOSE=1 ;;
+
+  -r|--resolution) shift; RESOLUTION=$1 ;;
+
+  -a|--append) APPEND=1 ;;
+
+  -h|--help) HELP=1 ;;
+
+  -s|--size) shift; SIZE=$1 ;;
+
+  -ph|--page-height) shift; PGHEIGHT=$1 ;;
+
+  -pw|--page-width) shift; PGWIDTH=$1 ;;
+
+  --no-default-size) DEFAULTSIZE=0 ;;
+
+  --crop) CROP=1 ;;
+
+  --deskew) DESKEW=1 ;;
+
+  --unpaper) UNPAPER=1 ;;
+
+  --searchable|--ocr) SEARCHABLE=1 ;;
+
+  --language) shift; LANGUAGE=$1 ;;
+
+  --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
+
+  --optimize-images) OPTIMIZE_IMAGES=1 ;;
+
+  --full-optimization) FULL_OPTIMIZATION=1 ;;
+
+  -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
+
+  -l|--outputlist) shift; USEARRAY=1; OUTPUTARR=(); OUTPUTARR+=("$1") ;;
+
+  -x|--device) shift; DEVICE="$1";;
+
+  -xo|--driver-options) shift; DRIVER_OPTION=$1;;
+
+  *) if [[ $USEARRAY == 1 ]]; then OUTPUTARR+=("$1"); else echo >&2 "Unknown argument: $1"; exit 1; fi ;;
+
+  esac
+  shift   # next option
+done
