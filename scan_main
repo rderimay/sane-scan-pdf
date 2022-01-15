@@ -35,7 +35,7 @@ OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
 SOURCE=""
 
-TMP_DIR="/home/pi/scans/"   # $(mktemp -d -p "" scan.XXXXXXXXXX)
+TMP_DIR=$(mktemp -d -p "/home/pi/scans" scan.XXXXXXXXXX)
 cleanup()
 {
   # rm -rf "$TMP_DIR"
