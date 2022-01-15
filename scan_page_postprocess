@@ -97,7 +97,6 @@ process_page() {
   fi
 
   status=$?
-  rm $IMAGE_PATH
 
   log ""
   log "Scan page post-processing done, status = $status"
