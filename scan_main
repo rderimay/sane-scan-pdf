@@ -1,0 +1,322 @@
+#!/bin/bash
+
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+DEVICE=fujitsu
+OUTPUT=scan.pdf
+OUTPUTARR=()
+USEOUTPUT=0
+USEARRAY=0
+APPEND=0
+RESOLUTION=300
+MODE=Lineart
+MODE_CHANGED=0
+MODE_HW_DEFAULT=0
+SCRIPT="$DIR/postprocessing"
+DUPLEX=0
+UNPAPER=0
+SEARCHABLE=0
+LANGUAGE=eng
+MAXPAGE=
+TRUNCPAGE=0
+HELP=0
+SIZE=
+DEFAULTSIZE=1
+PGHEIGHT=
+PGHEIGHTIN=
+PGWIDTH=
+PGWIDTHIN=
+CROP=0
+DESKEW=0
+DRIVER_OPTION=
+VERBOSE=0
+SKIP_EMPTY_PAGES=0
+OPTIMIZE_IMAGES=0
+FULL_OPTIMIZATION=0
+SOURCE=""
+
+TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
+cleanup()
+{
+  rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+DEFAULTS="${XDG_DATA_HOME:-$HOME/.local/share}/sane-scan-pdf/defaults"
+SCANPRE="${XDG_DATA_HOME:-$HOME/.local/share}/sane-scan-pdf/scan_pre"
+[ -e "$DEFAULTS" ] && . "$DEFAULTS"
+
+# Parse command-line options
+while [[ $# > 0 ]]; do
+  case "$1" in
+
+  -v|--verbose) VERBOSE=1 ;;
+
+  -d|--duplex) DUPLEX=1 ;;
+
+  -m|--mode) shift; MODE=$1; MODE_CHANGED=1 ;;
+
+  --mode-hw-default) MODE_HW_DEFAULT=1 ;;
+
+  -r|--resolution) shift; RESOLUTION=$1 ;;
+
+  -a|--append) APPEND=1 ;;
+
+  -e|--max) shift; MAXPAGE=$1 ;;
+
+  -t|--truncate) shift; TRUNCPAGE=$1 ;;
+
+  -h|--help) HELP=1 ;;
+
+  -s|--size) shift; SIZE=$1 ;;
+
+  -ph|--page-height) shift; PGHEIGHT=$1 ;;
+
+  -pw|--page-width) shift; PGWIDTH=$1 ;;
+
+  --no-default-size) DEFAULTSIZE=0 ;;
+
+  --crop) CROP=1 ;;
+
+  --deskew) DESKEW=1 ;;
+
+  --unpaper) UNPAPER=1 ;;
+
+  --searchable|--ocr) SEARCHABLE=1 ;;
+
+  --language) shift; LANGUAGE=$1 ;;
+
+  --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
+
+  --optimize-images) OPTIMIZE_IMAGES=1 ;;
+
+  --full-optimization) FULL_OPTIMIZATION=1 ;;
+
+  -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
+
+  -l|--outputlist) shift; USEARRAY=1; OUTPUTARR=(); OUTPUTARR+=("$1") ;;
+
+  -x|--device) shift; DEVICE="$1";;
+
+  -xo|--driver-options) shift; DRIVER_OPTION=$1;;
+
+  *) if [[ $USEARRAY == 1 ]]; then OUTPUTARR+=("$1"); else echo >&2 "Unknown argument: $1"; exit 1; fi ;;
+
+  esac
+  shift   # next option
+done
+
+if [[ $HELP == 1 ]]; then
+  echo "$(basename $0) [OPTIONS]... [OUTPUT]"
+  echo ""
+  echo "OPTIONS"
+  echo " -v, --verbose"
+  echo "   Verbose output (this will slow down the scan due to the need to prevent interleaved output)"
+  echo " -d, --duplex"
+  echo "   Duplex scanning"
+  echo " -m, --mode"
+  echo "   Mode e.g. Lineart (default), Halftone, Gray, Color, etc. Use --mode-hw-default to not set any mode"
+  echo " --mode-hw-default"
+  echo "   Do not set the mode explicitly, use the hardware default"
+  echo " -r, --resolution"
+  echo "   Resolution e.g 300 (default)"
+  echo " -a, --append"
+  echo "   Append output to existing scan"
+  echo " -e, --max <pages>"
+  echo "   Max number of pages e.g. 2 (default is all pages)"
+  echo " -t, --truncate <pages>"
+  echo "   Truncate number of pages from end e.g. 1 (default is none) -- truncation happens after --skip-empty-pages"
+  echo " -s, --size"
+  echo "   Page Size as type e.g. Letter (default), Legal, A4, no effect if --crop is specified"
+  echo " -ph, --page-height"
+  echo "   Custom Page Height in mm"
+  echo " -pw, --page-width"
+  echo "   Custom Page Width in mm"
+  echo " -x, --device"
+  echo "  Override scanner device name, defaulting to \"$DEVICE\""
+  echo " -xo, --driver-options"
+  echo "  Send additional options to the scanner driver e.g."
+  echo "  -xo \"--whatever bar --frobnitz baz\""
+  echo " --no-default-size"
+  echo "   Disable default page size, useful if driver does not support page size/location arguments"
+  echo " --crop"
+  echo "   Crop to contents (driver must support this)"
+  echo " --deskew"
+  echo "   Run driver deskew (driver must support this)"
+  echo " --unpaper"
+  echo "   Run post-processing deskew and black edge detection (requires unpaper)"
+  echo " --ocr"
+  echo "   Run OCR to make the PDF searchable (requires tesseract)"
+  echo " --language <lang>"
+  echo "   Which language to use for OCR"
+  echo " --skip-empty-pages"
+  echo "   Remove empty pages from resulting PDF document (e.g. one sided doc in duplex mode)"
+  echo " --optimize-images"
+  echo "   Runs an ImageMagick optimization script that should produce cleaner scans. "
+  echo " --full-optimization"
+  echo "   Uses another, more agressive, algorithm to clean up the images. It produces excellent results when dealing with documents but will tend to destroy contained photos. "
+  echo "OUTPUT"
+  echo " -o, --output <outputfile>"
+  echo "   Output to named file default=scan.pdf"
+  echo " -l, --outputlist <outputfile-1...outputfile-n> Output to named files for each scanned page, can be used with append"
+  echo ""
+  echo "CONFIGURATION"
+  echo "Local configuration can be written in the form of environment variables to:"
+  echo "  $DEFAULTS"
+  echo ""
+  echo "A pre-scan hook script can be written to:"
+  echo "  $SCANPRE"
+  echo ""
+  exit 0
+fi
+
+if [[ $USEARRAY == 1 && $USEOUTPUT == 1 ]]; then
+  echo >&2 "Use one of -o or -l. Aborting."
+  exit 1
+fi
+
+if [[ $MODE_CHANGED == 1 && $MODE_HW_DEFAULT == 1 ]]; then
+  echo >&2 "Use one of -m/--mode or --mode-hardware-default. Aborting."
+  exit 1
+fi
+
+if [[ $MODE_CHANGED == 0 && $MODE_HW_DEFAULT == 0 ]]; then
+  echo >&2 'Warning: neither the -m/--mode nor --mode-hw-default argument was specified. The current default is "Lineart", however -m/--mode is a SANE device-specific switch. Therefore, in a future version when --mode is not specified, `'"`basename "$0"`""'"' will defer to the device-specific default. If you wish to continue using "Lineart" as your scan mode, either verify that is the default for your scanner (scanadf --help -d <device>), or specify --mode Lineart explicitly on the command line.'
+fi
+
+if [[ $USEOUTPUT == 1 && "$OUTPUT" == "" ]]; then
+  echo >&2 "Output file must be specified. Aborting."
+  exit 1
+fi
+
+if [[ $USEOUTPUT == 1 && -f "$OUTPUT" && $APPEND != 1 ]]; then
+  echo >&2 "Output file $OUTPUT already exists. Delete or specify -a. Aborting."
+  exit 1
+fi
+
+if [[ $USEARRAY == 1 && ${#OUTPUTARR[@]} == 0 ]]; then
+  echo >&2 "At least one file must be specified with -l. Aborting."
+  exit 1
+fi
+
+if [[ $USEARRAY == 1 && $APPEND != 1 ]]; then
+  for o in "${OUTPUTARR[@]}"; do
+    if [[ -f "$o" ]]; then
+      echo >&2 "Output file $o already exists. Delete or specify -a. Aborting."
+      exit 1
+    fi
+  done
+fi
+
+if [[ $USEARRAY == 1 ]]; then
+  OUTPUT=("${OUTPUTARR[@]}")
+fi
+
+if [[ $DUPLEX == 1 ]]; then
+  SOURCE="--source \"ADF Duplex\""
+fi
+
+if [[ "$MAXPAGE" != "" ]]; then
+  MAXPAGE="-e $MAXPAGE"
+fi
+
+PS2PDF_OPTS=
+
+if [[ $CROP != 1 && $SIZE == "" && $DEFAULTSIZE == 1 ]]; then
+  # Default to Letter size, but only if crop is not specified and this feature is not disabled
+  SIZE=Letter
+fi
+
+case "$SIZE" in
+
+  Letter) PGHEIGHT=279.4; PGWIDTH=215.9 ;;
+
+  Legal) PGHEIGHT=355.6; PGWIDTH=215.9 ;;
+
+  A4) PGHEIGHT=297; PGWIDTH=210 ;;
+
+esac
+
+if [[ $CROP != 1 && "$PGHEIGHT" != "" ]]; then
+  PGHEIGHTIN=$(units --compact -1 "$PGHEIGHT mm" 'in')
+  PGHEIGHT="--page-height $PGHEIGHT -y $PGHEIGHT"
+  PS2PDF_OPTS="-dEPSCrop"
+fi
+
+if [[ $CROP != 1 && "$PGWIDTH" != "" ]]; then
+  PGWIDTHIN=$(units --compact -1 "$PGWIDTH mm" 'in')
+  PGWIDTH="--page-width $PGWIDTH -x $PGWIDTH"
+  PS2PDF_OPTS="-dEPSCrop"
+fi
+
+if [[ $CROP == 1 ]]; then
+  CROP="--swcrop=yes --ald=yes"
+  # In duplex mode, the driver's buffer for the back side image will be larger than necessary, oh well
+  # http://sane.10972.n7.nabble.com/Fujitsu-backend-and-iX500-scanning-page-longer-than-14-Inches-td19303.html
+  PGHEIGHT="--page-height 9999 -y 9999"
+  PGWIDTH="--page-width 9999 -x 9999"
+  PS2PDF_OPTS="-dEPSCrop"
+fi
+
+if [[ $DESKEW == 1 ]]; then
+  DESKEW="--swdeskew=yes"
+fi
+
+
+if [[ $VERBOSE == 1 ]]; then
+  LOCKFILE=$(mktemp)
+  trap "cleanup; rm -rf $LOCKFILE" EXIT
+  export LOCKFILE
+fi;
+
+echo >&2 "Scanning..."
+#eval strace -f -o /tmp/scan-trace.txt scanadf -d $DEVICE $MAXPAGE $PGHEIGHT $PGWIDTH --resolution $RESOLUTION --mode $MODE $DESKEW $CROP $SOURCE -o scan-%04d
+if [[ $MODE_HW_DEFAULT == 1 ]]; then
+  MODE=
+else
+  MODE="--mode '$MODE'"
+fi
+[ -e "$SCANPRE" ] && . "$SCANPRE"
+eval scanadf -d \'"$DEVICE"\' $MAXPAGE $PGHEIGHT $PGWIDTH $DESKEW $CROP $DRIVER_OPTION $SOURCE --resolution $RESOLUTION $MODE -o $TMP_DIR/scan-%04d
+# Simulate empty page scanner outputs for debugging
+#convert xc:none -page Letter $TMP_DIR/scan-0001.pdf
+
+params="--resolution=$RESOLUTION"
+if [[ $VERBOSE == 1 ]]; then
+  params="$params --verbose"
+fi
+
+if [[ $UNPAPER == 1 ]]; then
+  params="$params --unpaper"
+fi
+
+if [[ $SEARCHABLE == 1 ]]; then
+  params="$params --searchable --language=$LANGUAGE"
+fi
+
+if [[ $SKIP_EMPTY_PAGES == 1 && ! -x "$(command -v bc)" ]]; then
+  echo >&2 'Warning: `--skip-empty-pages` specified, but `bc` not available. Disabling empty page detection.'
+  SKIP_EMPTY_PAGES=0
+fi
+
+if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
+  params="$params --skip-empty-images"
+fi
+
+if [[ $OPTIMIZE_IMAGES == 1 ]]; then
+  if [[ $FULL_OPTIMIZATION == 1 ]]; then
+    params="$params --optimization=full"
+  else
+    params="$params --optimization=std"
+  fi
+else
+  if [[ $FULL_OPTIMIZATION == 1 ]]; then
+    echo >&2 'Warning: `--full-optimization` specified, without `--optimize-images`. No optimization will be done.'
+  fi
+fi
+
+echo $SCRIPT $params "$TMP_DIR"
+
+export PGWIDTHIN
+export PGHEIGHTIN
+export PS2PDF_OPTS
