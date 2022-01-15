@@ -36,7 +36,7 @@ OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
 SOURCE=""
 
-TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
+TMP_DIR=/home/pi/scans # $(mktemp -d -p "" scan.XXXXXXXXXX)
 cleanup()
 {
   echo "CLEANUP CANCELED !!!!!!!!!!!!!" # rm -rf "$TMP_DIR"

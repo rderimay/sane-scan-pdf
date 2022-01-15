@@ -8,7 +8,7 @@ OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
 
 # Parse command-line options
-while [[ $# > 0 ]]; do
+while [[ $# > 1 ]]; do
   case "$1" in
 
   -v|--verbose) VERBOSE=1 ;;
