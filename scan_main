@@ -315,8 +315,16 @@ else
   fi
 fi
 
-echo $SCRIPT $params "$TMP_DIR"
+if [[ "$PGWIDTHIN" != "" ]]; then
+  params="$params --page-width=\"$PGWIDTHIN\""
+fi
 
-export PGWIDTHIN
-export PGHEIGHTIN
-export PS2PDF_OPTS
+if [[ "$PGHEIGHTIN" != "" ]]; then
+  params="$params --page-height=\"$PGHEIGHTIN\""
+fi
+
+if [[ "$PS2PDF_OPTS" != "" ]]; then
+  params="$params --ps2pdf-opts=\"$PS2PDF_OPTS\""
+fi
+
+echo $SCRIPT $params --input-dir="$TMP_DIR" --output="$OUTPUT"
