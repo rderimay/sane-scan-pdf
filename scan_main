@@ -329,4 +329,4 @@ if [[ "$PS2PDF_OPTS" != "" ]]; then
   params="$params --ps2pdf-opts \"$PS2PDF_OPTS\""
 fi
 
-nohup $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
+eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
