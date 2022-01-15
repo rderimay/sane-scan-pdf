@@ -308,10 +308,11 @@ numscans=${#pngfiles[@]}
 
 if (( numscans == 0 )); then
   echo "No scan found."
+  exit 0
 else
-  echo "Truncating $numscans pages if needed…"
-
   if (( TRUNCPAGE > 0 )); then
+    echo "Truncating…"
+
     truncpage=$TRUNCPAGE
     if (( numscans < TRUNCPAGE )); then
       truncpage=$numscans
@@ -333,7 +334,7 @@ fi
 numscans=${#pngfiles[@]}
 echo "Post-processing $numscans pages…"
 
-for x in ${pdffiles[@]}; do
+for x in pdffiles[@]; do
     eval $POSTPROCESS_SCRIPT --optimize-images --full-optimization "$x"
 done;
 
