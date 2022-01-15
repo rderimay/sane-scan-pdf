@@ -303,8 +303,8 @@ eval scanadf -d \'"$DEVICE"\' $MAXPAGE $PGHEIGHT $PGWIDTH -S $PREPROCESS_SCRIPT 
 #convert xc:none -page Letter $TMP_DIR/scan-0001.pdf
 
 shopt -s extglob nullglob
-pngfiles=($TMP_DIR/scan-[0-9]*.png)
-numscans=${#pngfiles[@]}
+ppmfiles=($TMP_DIR/scan-[0-9]*)
+numscans=${#ppmfiles[@]}
 
 if (( numscans == 0 )); then
   echo "No scan found."
@@ -317,8 +317,8 @@ else
     if (( numscans < TRUNCPAGE )); then
       truncpage=$numscans
     fi
-    for x in ${pngfiles[@]:$numscans-$truncpage:$truncpage}; do rm "$x"; done;
-    pngfiles=(${pngfiles[@]:0:$numscans-$truncpage})
+    for x in ${ppmfiles[@]:$numscans-$truncpage:$truncpage}; do rm "$x"; done;
+    ppmfiles=(${ppmfiles[@]:0:$numscans-$truncpage})
 
     let "numscans = numscans - truncpage"
 
@@ -331,10 +331,10 @@ else
   fi
 fi
 
-numscans=${#pngfiles[@]}
+numscans=${#ppmfiles[@]}
 echo "Post-processing $numscans pages…"
 
-for x in ${pngfiles[@]}
+for x in ${ppmfiles[@]}
 do
     eval $POSTPROCESS_SCRIPT --verbose --optimize-images --full-optimization "$x"
 done
