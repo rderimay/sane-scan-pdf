@@ -59,6 +59,7 @@ echo "Post-processing $numscans pages…"
 
 for x in ${ppmfiles[@]}
 do
+    echo "$POSTPROCESS_SCRIPT --verbose --optimize-images --full-optimization \"$x\""
     eval $POSTPROCESS_SCRIPT --verbose --optimize-images --full-optimization "$x"
 done
 
