@@ -330,7 +330,7 @@ numscans=${#ppmfiles[@]}
 echo "Post-processing $numscans pages…"
 
 # Starting on another thread to we can scan again
-eval $POSTPROCESS_SCRIPT --verbose --optimize-images --full-optimization "$TMP_DIR"
+nohup $POSTPROCESS_SCRIPT --verbose --optimize-images --full-optimization "$TMP_DIR" &
 
 exit 0
 
