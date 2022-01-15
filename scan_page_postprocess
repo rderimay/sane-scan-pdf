@@ -83,16 +83,16 @@ fi
 process_page() {
   log ""
   log "-------------------------------------------------------------------------------"
-  log "Post-processing scanned page ${IMAGE_PATH} with resolution=$RESOLUTION, searchable=$SEARCHABLE, language=$LANGUAGE, optimize-images=$OPTIMIZE_IMAGES, full-optimization=$FULL_OPTIMIZATION…"
+  log "Post-processing page ${IMAGE_PATH} with resolution=$RESOLUTION, searchable=$SEARCHABLE, language=$LANGUAGE, optimize-images=$OPTIMIZE_IMAGES, full-optimization=$FULL_OPTIMIZATION…"
   log "-------------------------------------------------------------------------------"
 
   if [[ $OPTIMIZE_IMAGES == 1 ]]; then
-    log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
+    log "Optimizing image…"
 
     if [[ $FULL_OPTIMIZATION == 1 ]]; then
-      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH.tiff | logstdout
     else
-      runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH.tiff | logstdout
     fi
   fi
 

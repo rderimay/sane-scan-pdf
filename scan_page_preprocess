@@ -62,7 +62,7 @@ fi
 process_page() {
   log ""
   log "-------------------------------------------------------------------------------"
-  log "Pre-processing scanned page ${IMAGE_PATH} with skip-empty-pages=$SKIP_EMPTY_PAGES…"
+  log "Pre-processing page ${IMAGE_PATH} with resolution=$RESOLUTION, skip-empty-pages=$SKIP_EMPTY_PAGES…"
   log "-------------------------------------------------------------------------------"
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
@@ -75,14 +75,12 @@ process_page() {
 
   if [[ $SKIP_EMPTY_PAGES == 1 && $(echo "$PERCENTAGE_WHITE > 99.8" | bc -l) == 1 ]]; then
     log "Skipping empty page $IMAGE_FILE with white percentage $PERCENTAGE_WHITE"
-
+    rm $IMAGE_PATH
   else
-    log "Keeping page and converting to png"
-    runconstrained $TIMEVERBOSE convert -density ${RESOLUTION}x${RESOLUTION} -units PixelsPerInch -type TrueColor -quality 80 $IMAGE_PATH $IMAGE_PATH.png | logstdout
+    log "Keeping page $IMAGE_FILE"
   fi
 
   status=$?
-  #rm $IMAGE_PATH
 
   log ""
   log "Scan page pre-processing done, status = $status"
