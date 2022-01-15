@@ -40,19 +40,19 @@ while [[ $# > 0 ]]; do
 
   --unpaper) UNPAPER=1 ;;
 
-  --searchable|--ocr) SEARCHABLE=1 ;;
+  --ocr) SEARCHABLE=1 ;;
 
   --language) shift; LANGUAGE=$1 ;;
 
   --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
 
-  --optimization) OPTIMIZATION=$1 ;;
+  --optimization) shift; OPTIMIZATION=$1 ;;
 
-  --page-width) PAGE_WIDTH=$1 ;;
+  --page-width) shift; PAGE_WIDTH=$1 ;;
 
-  --page-height) PAGE_HEIGHT=$1 ;;
+  --page-height) shift; PAGE_HEIGHT=$1 ;;
 
-  --ps2pdf-opts) PS2PDF_OPTS=$1 ;;
+  --ps2pdf-opts) shift; PS2PDF_OPTS=$1 ;;
 
   --input-dir) shift; INPUT_DIR="$1" ;;
 

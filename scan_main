@@ -293,7 +293,7 @@ if [[ $UNPAPER == 1 ]]; then
 fi
 
 if [[ $SEARCHABLE == 1 ]]; then
-  params="$params --searchable --language $LANGUAGE"
+  params="$params --ocr --language $LANGUAGE"
 fi
 
 if [[ $SKIP_EMPTY_PAGES == 1 && ! -x "$(command -v bc)" ]]; then
