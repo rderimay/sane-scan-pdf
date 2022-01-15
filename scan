@@ -331,7 +331,7 @@ else
 fi
 
 numscans=${#pngfiles[@]}
-echo "Post-processing $numscans pages if needed…"
+echo "Post-processing $numscans pages…"
 
 for x in ${pdffiles[@]}; do
     echo $x
