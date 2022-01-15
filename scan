@@ -334,7 +334,7 @@ numscans=${#pngfiles[@]}
 echo "Post-processing $numscans pages…"
 
 for x in ${pdffiles[@]}; do
-    echo $x
+    eval $POSTPROCESS_SCRIPT --optimize-images --full-optimization "$x"
 done;
 
 exit 0

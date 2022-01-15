@@ -2,6 +2,8 @@
 
 VERBOSE=0
 RESOLUTION=300
+SEARCHABLE=0
+LANGUAGE=eng
 OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
 
@@ -13,44 +15,101 @@ while [[ $# > 0 ]]; do
 
   -r|--resolution) shift; RESOLUTION=$1 ;;
 
-  -a|--append) APPEND=1 ;;
-
-  -h|--help) HELP=1 ;;
-
-  -s|--size) shift; SIZE=$1 ;;
-
-  -ph|--page-height) shift; PGHEIGHT=$1 ;;
-
-  -pw|--page-width) shift; PGWIDTH=$1 ;;
-
-  --no-default-size) DEFAULTSIZE=0 ;;
-
-  --crop) CROP=1 ;;
-
-  --deskew) DESKEW=1 ;;
-
-  --unpaper) UNPAPER=1 ;;
-
   --searchable|--ocr) SEARCHABLE=1 ;;
 
   --language) shift; LANGUAGE=$1 ;;
-
-  --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
 
   --optimize-images) OPTIMIZE_IMAGES=1 ;;
 
   --full-optimization) FULL_OPTIMIZATION=1 ;;
 
-  -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
-
-  -l|--outputlist) shift; USEARRAY=1; OUTPUTARR=(); OUTPUTARR+=("$1") ;;
-
-  -x|--device) shift; DEVICE="$1";;
-
-  -xo|--driver-options) shift; DRIVER_OPTION=$1;;
-
-  *) if [[ $USEARRAY == 1 ]]; then OUTPUTARR+=("$1"); else echo >&2 "Unknown argument: $1"; exit 1; fi ;;
+  *) echo >&2 "Unknown argument: $1"; exit 1 ;;
 
   esac
   shift   # next option
 done
+
+usage()
+{
+  echo "Usage: $(basename $0) [OPTIONS]... [FILE]"
+}
+
+log()
+{
+  if [[ $VERBOSE == 1 ]]; then
+    echo "scan_perpage_postprocess: $1"
+  fi
+}
+
+logstdout()
+{
+  if [[ $VERBOSE == 1 ]]; then
+    cat
+  else
+    cat > /dev/null
+  fi
+}
+
+runconstrained()
+{
+  if [[ -x "$(command -v sem)" ]]; then
+    # use up to 75% of the cores available
+    arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
+    sem --jobs 75% --id scan_perpage_postprocess --fg "$arg"
+  else
+    "$@"
+  fi
+}
+
+if [[ $# < 1 ]]; then
+  usage
+  exit 1
+fi
+
+if [[ "$RESOLUTION" == "" || "$SEARCHABLE" == ""|| "$LANGUAGE" == "" || "$OPTIMIZE_IMAGES" == "" || "$FULL_OPTIMIZATION" == "" ]]; then
+  usage
+  exit 1
+fi
+
+IMAGE_PATH=$1
+IMAGE_DIR=$(dirname $1)
+IMAGE_FILE=$(basename $1)
+
+TIMEVERBOSE=
+if [[ $VERBOSE == 1 ]]; then
+  TIMEVERBOSE=time
+fi
+
+process_page() {
+  log ""
+  log "-------------------------------------------------------------------------------"
+  log "Post-processing scanned page ${IMAGE_PATH} with resolution=$RESOLUTION, searchable=$SEARCHABLE, language=$LANGUAGE, optimize-images=$OPTIMIZE_IMAGES, full-optimization=$FULL_OPTIMIZATION…"
+  log "-------------------------------------------------------------------------------"
+
+  if [[ "$OPTIMIZE_IMAGES" == "STD" ]]; then
+    log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
+    runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
+  fi
+
+  if [[ "$OPTIMIZE_IMAGES" == "FULL" ]]; then
+    log "Applying optimization script $OPTIMIZE_IMAGES to image data..."
+    runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
+  fi
+
+  status=$?
+  rm $IMAGE_PATH
+
+  log ""
+  log "Scan page post-processing done, status = $status"
+}
+
+if [[ $VERBOSE == 1 ]]; then
+  (
+    flock 200
+    process_page
+  ) 200>$LOCKFILE
+else
+  process_page
+fi;
+
+exit $status
