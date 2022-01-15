@@ -20,7 +20,8 @@ OUTPUT=
 
 cleanup()
 {
-  rm -rf "$INPUT_DIR"
+  # rm -rf "$INPUT_DIR"
+  echo "Cleanup CANCELED!!!!!"
 }
 trap cleanup EXIT
 
