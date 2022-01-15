@@ -302,7 +302,7 @@ if [[ $SKIP_EMPTY_PAGES == 1 && ! -x "$(command -v bc)" ]]; then
 fi
 
 if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-  params="$params --skip-empty-images"
+  params="$params --skip-empty-pages"
 fi
 
 if [[ $OPTIMIZE_IMAGES == 1 ]]; then

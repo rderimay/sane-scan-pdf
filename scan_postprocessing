@@ -119,13 +119,13 @@ for x in ${ppmfiles[@]}; do
   if [[ $SKIP_EMPTY_PAGES == 1 && $(echo "$PERCENTAGE_WHITE > 99.8" | bc -l) == 1 ]]; then
     log "Skipping empty page $IMAGE_FILE with white percentage $PERCENTAGE_WHITE"
   else
-    if [[ "$OPTIMIZE_IMAGES" == "std" ]]; then
-      log "Applying optimization script \"$OPTIMIZE_IMAGES\" to image data..."
+    if [[ "$OPTIMIZATION" == "std" ]]; then
+      log "Applying optimization script \"$OPTIMIZATION\" to image data..."
       runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
     fi
 
-    if [[ "$OPTIMIZE_IMAGES" == "full" ]]; then
-      log "Applying optimization script \"$OPTIMIZE_IMAGES\" to image data..."
+    if [[ "$OPTIMIZATION" == "full" ]]; then
+      log "Applying optimization script \"$OPTIMIZATION\" to image data..."
       runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
     fi
 
