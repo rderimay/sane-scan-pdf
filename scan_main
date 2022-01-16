@@ -291,6 +291,12 @@ eval scanadf -d \'"$DEVICE"\' $MAXPAGE $PGHEIGHT $PGWIDTH $DESKEW $CROP $DRIVER_
 # Simulate empty page scanner outputs for debugging
 #convert xc:none -page Letter $TMP_DIR/scan-0001.pdf
 
+
+if [[ $DEFER_POSTPROCESSING == 1 && ! -x "$(command -v sem)"  ]]; then
+  echo >&2 'Warning: `--defer-postprocessing` specified, but `sem` not available. Disabling deferred post processing.'
+  $DEFER_POSTPROCESSING=0
+fi
+
 params="--resolution $RESOLUTION"
 
 if [[ $VERBOSE == 1 ]]; then
@@ -342,25 +348,14 @@ if [[ $DEFER_POSTPROCESSING == 1 ]]; then
   echo "Defering post-processing."
 fi
 
-putInQueue()
-{
-  if [[ -x "$(command -v sem)" ]]; then
-    arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
-
-    # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
-    sem --jobs 1 --id scan_main --bg "$arg"
-  else
-    "$@"
-  fi
-}
-
 if [[ $USEARRAY == 1 ]]; then
   if [[ $DEBUG == 1 ]]; then
     echo $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
   fi
 
   if [[ $DEFER_POSTPROCESSING == 1 ]]; then
-    putInQueue nohup $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" > /tmp/nohup.out 2>&1
+    # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
+    sem --jobs 1 --id scan_main --bg $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
   else
     eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
   fi
@@ -370,7 +365,8 @@ else
   fi
 
   if [[ $DEFER_POSTPROCESSING == 1 ]]; then
-    putInQueue nohup $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" > /tmp/nohup.out 2>&1
+    # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
+    sem --jobs 1 --id scan_main --bg  $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
   else
     eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
   fi
