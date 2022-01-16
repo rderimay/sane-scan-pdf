@@ -46,11 +46,7 @@ fi
 
 cleanup()
 {
-  if [[ $DEBUG == 1 ]]; then
-    echo "!! DEBUG !! Cleanup canceled by DEBUG."
-  else
-    rm -rf "$TMP_DIR"
-  fi
+  :
 }
 trap cleanup EXIT
 
