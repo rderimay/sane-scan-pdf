@@ -340,7 +340,15 @@ if [[ "$PS2PDF_OPTS" != "" ]]; then
 fi
 
 if [[ $USEARRAY == 1 ]]; then
+  if [[ $DEBUG == 1 ]]; then
+    echo $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
+  fi
+
   eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" &
 else
+  if [[ $DEBUG == 1 ]]; then
+    echo $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
+  fi
+
   eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
 fi
