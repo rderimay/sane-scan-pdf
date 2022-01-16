@@ -345,8 +345,9 @@ fi
 putInQueue()
 {
   if [[ -x "$(command -v sem)" ]]; then
-    # use up to 75% of the cores available
     arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
+
+    # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
     sem --jobs 1 --id scan_main --bg "$arg"
   else
     "$@"
