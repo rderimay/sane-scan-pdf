@@ -140,7 +140,7 @@ for x in ${ppmfiles[@]}; do
   fi
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% \( +clone -lat ${RESOLUTION/5}x${RESOLUTION/5}-10% -threshold 96% \) -compose lighten -composite $imParams -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
+    PERCENTAGE_WHITE=$(convert $IMAGE_PATH -resize 20% -shave 4%x4% $imParams \( +clone -lat ${RESOLUTION/5}x${RESOLUTION/5}-10% -threshold 96% \) -compose lighten -composite -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
     log "$IMAGE_PATH has $PERCENTAGE_WHITE % white"
   else
     PERCENTAGE_WHITE=0
@@ -151,12 +151,12 @@ for x in ${ppmfiles[@]}; do
   else
     if [[ "$OPTIMIZATION" == "std" ]]; then
       log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-      runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $imParams $IMAGE_PATH | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
     fi
 
     if [[ "$OPTIMIZATION" == "full" ]]; then
       log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $imParams $IMAGE_PATH | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
     fi
 
     if [[ $UNPAPER == 1 ]]; then
