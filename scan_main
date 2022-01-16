@@ -344,11 +344,11 @@ else
   fi
 fi
 
-if [[ ! -x "$BRIGHTNESS_CONTRAST" ]]; then
+if [[ ! -z "$BRIGHTNESS_CONTRAST" ]]; then
   params="$params --brightness-contrast \"$BRIGHTNESS_CONTRAST\""
 fi
 
-if [[ ! -x "$LEVEL" ]]; then
+if [[ ! -z "$LEVEL" ]]; then
   params="$params --level \"$LEVEL\""
 fi
 

@@ -132,10 +132,10 @@ for x in ${ppmfiles[@]}; do
   IMAGE_FILE=$(basename $x)
 
   imParams=""
-  if [[ ! -x "$BRIGHTNESS_CONTRAST" ]]; then
+  if [[ ! -z "$BRIGHTNESS_CONTRAST" ]]; then
     imParams="$imParams -brightness-contrast $BRIGHTNESS_CONTRAST"
   fi
-  if [[ ! -x "$LEVEL" ]]; then
+  if [[ ! -z "$LEVEL" ]]; then
     imParams="$imParams -level $LEVEL"
   fi
 
