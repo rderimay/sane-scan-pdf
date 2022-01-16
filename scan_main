@@ -37,7 +37,7 @@ OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
 SOURCE=""
 
-if [[ $DEBUG == 1]]; then
+if [[ $DEBUG == 1 ]]; then
   TMP_DIR=$(mktemp -d -p "/home/pi/scans" scan.XXXXXXXXXX)
 else
   TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
