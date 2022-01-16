@@ -2,6 +2,8 @@
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
+DEBUG=1
+
 VERBOSE=0
 RESOLUTION=300
 APPEND=0
@@ -16,12 +18,17 @@ PAGE_WIDTH=
 PAGE_HEIGHT=
 PS2PDF_OPTS=
 INPUT_DIR=
+USEOUTPUT=0
+USEARRAY=0
 OUTPUT=
 
 cleanup()
 {
-  # rm -rf "$INPUT_DIR"
-  echo "Cleanup CANCELED!!!!!"
+  if [[ $DEBUG == 1 ]]; then
+    echo "!! DEBUG !! Cleanup canceled by DEBUG."
+  else
+    rm -rf "$INPUT_DIR"
+  fi
 }
 trap cleanup EXIT
 
@@ -57,9 +64,11 @@ while [[ $# > 0 ]]; do
 
   --input-dir) shift; INPUT_DIR="$1" ;;
 
-  --output) shift; OUTPUT="$1" ;;
+  --outputlist) shift; USEARRAY=1; OUTPUTARR=(); OUTPUTARR+=("$1") ;;
 
-  *) echo >&2 "Unknown argument: $1"; exit 1 ;;
+  --output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
+
+  *) if [[ $USEARRAY == 1 ]]; then OUTPUTARR+=("$1"); else echo >&2 "Unknown argument: $1"; exit 1; fi ;;
 
   esac
   shift   # next option
@@ -91,6 +100,11 @@ runconstrained()
     "$@"
   fi
 }
+
+if [[ $USEARRAY == 1 && $USEOUTPUT == 1 ]]; then
+  echo >&2 "--output and --outputlist can not be used at the same time. Aborting."
+  exit 1
+fi
 
 TIMEVERBOSE=
 if [[ $VERBOSE == 1 ]]; then
@@ -178,8 +192,6 @@ for x in ${ppmfiles[@]}; do
   log "Scan page processing done, status = $status"
 done;
 
-
-exit 1
 
 shopt -s extglob nullglob
 pdffiles=($INPUT_DIR/scan-[0-9]*.pdf)

@@ -2,6 +2,8 @@
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
+DEBUG=1
+
 DEVICE=fujitsu
 OUTPUT=scan.pdf
 OUTPUTARR=()
@@ -35,11 +37,19 @@ OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
 SOURCE=""
 
-TMP_DIR=$(mktemp -d -p "/home/pi/scans" scan.XXXXXXXXXX)
+if [[ $DEBUG == 1]]; then
+  TMP_DIR=$(mktemp -d -p "/home/pi/scans" scan.XXXXXXXXXX)
+else
+  TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
+fi
+
 cleanup()
 {
-  # rm -rf "$TMP_DIR"
-  echo "Cleanup CANCELED!!!!!"
+  if [[ $DEBUG == 1 ]]; then
+    echo "!! DEBUG !! Cleanup canceled by DEBUG."
+  else
+    rm -rf "$TMP_DIR"
+  fi
 }
 trap cleanup EXIT
 
@@ -329,4 +339,8 @@ if [[ "$PS2PDF_OPTS" != "" ]]; then
   params="$params --ps2pdf-opts \"$PS2PDF_OPTS\""
 fi
 
-eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
+if [[ $USEARRAY == 1 ]]; then
+  eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" &
+else
+  eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
+fi
