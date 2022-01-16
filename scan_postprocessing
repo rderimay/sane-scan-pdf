@@ -2,7 +2,7 @@
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-DEBUG=1
+DEBUG=0
 
 VERBOSE=0
 RESOLUTION=300
@@ -155,16 +155,8 @@ for x in ${ppmfiles[@]}; do
     fi
 
     if [[ $SEARCHABLE == 1 ]]; then
-      log "Converting image data to searchable pdf..."
-      # tesseract uses the input's DPI header, we need to convert to a format that supports this (like tiff)
-
-      log "...Running convert"
-      runconstrained $TIMEVERBOSE convert -density ${RESOLUTION}x${RESOLUTION} -units PixelsPerInch $IMAGE_DIR/$PP_PREFIX$IMAGE_FILE $IMAGE_DIR/$PP_PREFIX${IMAGE_FILE}.tiff | logstdout
-
       log "...Running tesseract"
-      runconstrained $TIMEVERBOSE tesseract $IMAGE_DIR/$PP_PREFIX${IMAGE_FILE} $IMAGE_DIR/${IMAGE_FILE%.*} -l $LANGUAGE pdf --dpi ${RESOLUTION} | logstdout
-
-      [[ -f $IMAGE_DIR/$PP_PREFIX${IMAGE_FILE}.tiff ]] && rm $IMAGE_DIR/$PP_PREFIX${IMAGE_FILE}.tiff
+      runconstrained $TIMEVERBOSE tesseract $IMAGE_DIR/$PP_PREFIX${IMAGE_FILE} $IMAGE_DIR/${IMAGE_FILE%.*} -l $LANGUAGE --dpi ${RESOLUTION} pdf | logstdout
     else
       log "Converting image data to pdf..."
       if [[ "$PGWIDTHIN" == "" || "$PGHEIGHTIN" == "" ]]; then

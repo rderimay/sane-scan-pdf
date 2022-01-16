@@ -2,7 +2,7 @@
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-DEBUG=1
+DEBUG=0
 
 DEVICE=fujitsu
 OUTPUT=scan.pdf
@@ -344,11 +344,11 @@ if [[ $USEARRAY == 1 ]]; then
     echo $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
   fi
 
-  eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" &
+  nohup eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" &
 else
   if [[ $DEBUG == 1 ]]; then
     echo $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
   fi
 
-  eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
+  nohup eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
 fi
