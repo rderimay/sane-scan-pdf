@@ -292,9 +292,15 @@ eval scanadf -d \'"$DEVICE"\' $MAXPAGE $PGHEIGHT $PGWIDTH $DESKEW $CROP $DRIVER_
 #convert xc:none -page Letter $TMP_DIR/scan-0001.pdf
 
 
-if [[ $DEFER_POSTPROCESSING == 1 && ! -x "$(command -v sem)"  ]]; then
-  echo >&2 'Warning: `--defer-postprocessing` specified, but `sem` not available. Disabling deferred post processing.'
-  $DEFER_POSTPROCESSING=0
+if [[ $DEFER_POSTPROCESSING == 1 ]]; then
+  if [[  ! -x "$(command -v sem)" ]]; then
+    echo >&2 'Warning: `--defer-postprocessing` specified, but `sem` not available. Disabling deferred post processing.'
+    $DEFER_POSTPROCESSING=0
+  fi
+  if [[  ! -x "$(command -v nohup)" ]]; then
+    echo >&2 'Warning: `--defer-postprocessing` specified, but `nohup` not available. Disabling deferred post processing.'
+    $DEFER_POSTPROCESSING=0
+  fi
 fi
 
 params="--resolution $RESOLUTION"
