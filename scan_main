@@ -15,6 +15,7 @@ MODE=Lineart
 MODE_CHANGED=0
 MODE_HW_DEFAULT=0
 SCRIPT="$DIR/scan_postprocessing"
+DEFER_POSTPROCESSING=0
 DUPLEX=0
 UNPAPER=0
 SEARCHABLE=0
@@ -62,6 +63,8 @@ while [[ $# > 0 ]]; do
   case "$1" in
 
   -v|--verbose) VERBOSE=1 ;;
+
+  --defer-postprocessing) DEFER_POSTPROCESSING=1 ;;
 
   -d|--duplex) DUPLEX=1 ;;
 
@@ -339,16 +342,28 @@ if [[ "$PS2PDF_OPTS" != "" ]]; then
   params="$params --ps2pdf-opts \"$PS2PDF_OPTS\""
 fi
 
+if [[ $DEFER_POSTPROCESSING == 1 ]]; then
+  echo "Defering post-processing."
+fi
+
 if [[ $USEARRAY == 1 ]]; then
   if [[ $DEBUG == 1 ]]; then
     echo $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
   fi
 
-  nohup eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" &
+  if [[ $DEFER_POSTPROCESSING == 1 ]]; then
+    nohup $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" > /tmp/nohup.out 2>&1 &
+  else
+    eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
+  fi
 else
   if [[ $DEBUG == 1 ]]; then
     echo $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
   fi
 
-  nohup eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" &
+  if [[ $DEFER_POSTPROCESSING == 1 ]]; then
+    nohup $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" > /tmp/nohup.out 2>&1 &
+  else
+    eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
+  fi
 fi
