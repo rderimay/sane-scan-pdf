@@ -14,6 +14,8 @@ SEARCHABLE=0
 LANGUAGE=eng
 SKIP_EMPTY_PAGES=0
 OPTIMIZATION=
+BRIGHTNESS_CONTRAST="+20x20"
+LEVEL="30%,100%"
 PAGE_WIDTH=
 PAGE_HEIGHT=
 PS2PDF_OPTS=
@@ -55,6 +57,10 @@ while [[ $# > 0 ]]; do
   --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
 
   --optimization) shift; OPTIMIZATION=$1 ;;
+
+  --brightness-contrast) shift; BRIGHTNESS_CONTRAST=$1 ;;
+
+  --level) shift; LEVEL=$1 ;;
 
   --page-width) shift; PAGE_WIDTH=$1 ;;
 
@@ -126,7 +132,7 @@ for x in ${ppmfiles[@]}; do
   IMAGE_FILE=$(basename $x)
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% \( +clone -lat ${RESOLUTION/5}x${RESOLUTION/5}-10% -threshold 96% \) -compose lighten -composite -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
+    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% \( +clone -lat ${RESOLUTION/5}x${RESOLUTION/5}-10% -threshold 96% \) -compose lighten -composite -brightness-contrast $BRIGHTNESS_CONTRAST -level $LEVEL -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
     log "$IMAGE_PATH has $PERCENTAGE_WHITE % white"
   else
     PERCENTAGE_WHITE=0
@@ -142,7 +148,7 @@ for x in ${ppmfiles[@]}; do
 
     if [[ "$OPTIMIZATION" == "full" ]]; then
       log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite -brightness-contrast $BRIGHTNESS_CONTRAST -level $LEVEL $IMAGE_PATH | logstdout
     fi
 
     if [[ $UNPAPER == 1 ]]; then

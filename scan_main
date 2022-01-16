@@ -36,6 +36,8 @@ VERBOSE=0
 SKIP_EMPTY_PAGES=0
 OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
+BRIGHTNESS_CONTRAST="+20x20"
+LEVEL="30%,100%"
 SOURCE=""
 
 if [[ $DEBUG == 1 ]]; then
@@ -101,6 +103,10 @@ while [[ $# > 0 ]]; do
   --optimize-images) OPTIMIZE_IMAGES=1 ;;
 
   --full-optimization) FULL_OPTIMIZATION=1 ;;
+
+  --brightness-contrast) shift; BRIGHTNESS_CONTRAST=$1 ;;
+
+  --level) shift; LEVEL=$1 ;;
 
   -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
 
@@ -336,6 +342,14 @@ else
   if [[ $FULL_OPTIMIZATION == 1 ]]; then
     echo >&2 'Warning: `--full-optimization` specified, without `--optimize-images`. No optimization will be done.'
   fi
+fi
+
+if [[ $FULL_OPTIMIZATION == 1 ]]; then
+  params="$params --brightness-contrast \”$BRIGHTNESS_CONTRAST\""
+fi
+
+if [[ $FULL_OPTIMIZATION == 1 ]]; then
+  params="$params --level \"$LEVEL\""
 fi
 
 if [[ "$PGWIDTHIN" != "" ]]; then
