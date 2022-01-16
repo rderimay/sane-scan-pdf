@@ -1,5 +1,5 @@
 #!/bin/bash
-
+echo $$
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 DEBUG=0
@@ -355,7 +355,7 @@ if [[ $USEARRAY == 1 ]]; then
 
   if [[ $DEFER_POSTPROCESSING == 1 ]]; then
     # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
-    sem --jobs 1 --id scan_main --bg $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
+    sem --jobs 1 --id scan_main --bg nohup $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" > /tmp/nohup.out 2>&1 &
   else
     eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
   fi
@@ -366,8 +366,9 @@ else
 
   if [[ $DEFER_POSTPROCESSING == 1 ]]; then
     # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
-    sem --jobs 1 --id scan_main --bg  $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
+    sem --jobs 1 --id scan_main --bg nohup $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" > /tmp/nohup.out 2>&1 &
   else
     eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
   fi
 fi
+
