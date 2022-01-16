@@ -133,10 +133,10 @@ for x in ${ppmfiles[@]}; do
 
   imParams=""
   if [[ ! -x "$BRIGHTNESS_CONTRAST" ]]; then
-    imParams="$imParams -brightness-contrast \"$BRIGHTNESS_CONTRAST\""
+    imParams="$imParams -brightness-contrast $BRIGHTNESS_CONTRAST"
   fi
   if [[ ! -x "$LEVEL" ]]; then
-    imParams="$imParams -level \"$LEVEL\""
+    imParams="$imParams -level $LEVEL"
   fi
 
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
