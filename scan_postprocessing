@@ -14,8 +14,8 @@ SEARCHABLE=0
 LANGUAGE=eng
 SKIP_EMPTY_PAGES=0
 OPTIMIZATION=
-BRIGHTNESS_CONTRAST="+20x20"
-LEVEL="30%,100%"
+BRIGHTNESS_CONTRAST=
+LEVEL=
 PAGE_WIDTH=
 PAGE_HEIGHT=
 PS2PDF_OPTS=
@@ -131,8 +131,16 @@ for x in ${ppmfiles[@]}; do
   IMAGE_DIR=$(dirname $x)
   IMAGE_FILE=$(basename $x)
 
+  imParams=""
+  if [[ ! -x "$BRIGHTNESS_CONTRAST" ]]; then
+    imParams="$imParams -brightness-contrast \"$BRIGHTNESS_CONTRAST\""
+  fi
+  if [[ ! -x "$LEVEL" ]]; then
+    imParams="$imParams -level \"$LEVEL\""
+  fi
+
   if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% \( +clone -lat ${RESOLUTION/5}x${RESOLUTION/5}-10% -threshold 96% \) -compose lighten -composite -brightness-contrast $BRIGHTNESS_CONTRAST -level $LEVEL -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
+    PERCENTAGE_WHITE=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% \( +clone -lat ${RESOLUTION/5}x${RESOLUTION/5}-10% -threshold 96% \) -compose lighten -composite $imParams -fuzz 0% -negate -threshold 0 -negate -format "%[fx:100*mean]" info:) || PERCENTAGE_WHITE=0
     log "$IMAGE_PATH has $PERCENTAGE_WHITE % white"
   else
     PERCENTAGE_WHITE=0
@@ -143,12 +151,12 @@ for x in ${ppmfiles[@]}; do
   else
     if [[ "$OPTIMIZATION" == "std" ]]; then
       log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-      runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $imParams $IMAGE_PATH | logstdout
     fi
 
     if [[ "$OPTIMIZATION" == "full" ]]; then
       log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite -brightness-contrast $BRIGHTNESS_CONTRAST -level $LEVEL $IMAGE_PATH | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $imParams $IMAGE_PATH | logstdout
     fi
 
     if [[ $UNPAPER == 1 ]]; then

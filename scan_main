@@ -36,8 +36,8 @@ VERBOSE=0
 SKIP_EMPTY_PAGES=0
 OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
-BRIGHTNESS_CONTRAST="+20x20"
-LEVEL="30%,100%"
+BRIGHTNESS_CONTRAST=
+LEVEL=
 SOURCE=""
 
 if [[ $DEBUG == 1 ]]; then
@@ -344,12 +344,12 @@ else
   fi
 fi
 
-if [[ $FULL_OPTIMIZATION == 1 ]]; then
-  params="$params --brightness-contrast \"$BRIGHTNESS_CONTRAST\""
+if [[ ! -x "$BRIGHTNESS_CONTRAST" ]]; then
+  params="$params -brightness-contrast \"$BRIGHTNESS_CONTRAST\""
 fi
 
-if [[ $FULL_OPTIMIZATION == 1 ]]; then
-  params="$params --level \"$LEVEL\""
+if [[ ! -x "$LEVEL" ]]; then
+  params="$params -level \"$LEVEL\""
 fi
 
 if [[ "$PGWIDTHIN" != "" ]]; then
