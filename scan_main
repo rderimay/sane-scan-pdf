@@ -345,7 +345,7 @@ else
 fi
 
 if [[ $FULL_OPTIMIZATION == 1 ]]; then
-  params="$params --brightness-contrast \”$BRIGHTNESS_CONTRAST\""
+  params="$params --brightness-contrast \"$BRIGHTNESS_CONTRAST\""
 fi
 
 if [[ $FULL_OPTIMIZATION == 1 ]]; then
@@ -388,7 +388,6 @@ else
     # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
     sem --jobs 1 --id scan_main --bg nohup $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" > /tmp/nohup.out 2>&1 &
   else
-      echo $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
     eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
   fi
 fi
