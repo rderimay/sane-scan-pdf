@@ -99,10 +99,11 @@ logstdout()
 runconstrained()
 {
   if [[ -x "$(command -v sem)" ]]; then
-    arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
+    ### arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
 
     # use up to 75% of the cores available
-    sem --jobs 75% --id scan_postprocessing --fg "$arg"
+    ### sem --jobs 75% --id scan_postprocessing --fg "$arg"
+    sem --jobs 75% --id scan_postprocessing --fg $arg
   else
     "$@"
   fi
@@ -151,12 +152,12 @@ for x in ${ppmfiles[@]}; do
   else
     if [[ "$OPTIMIZATION" == "std" ]]; then
       log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-      runconstrained $TIMEVERBOSE convert "$IMAGE_PATH" $imParams -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" "$IMAGE_PATH" | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
     fi
 
     if [[ "$OPTIMIZATION" == "full" ]]; then
       log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-      runconstrained $TIMEVERBOSE convert "$IMAGE_PATH" $imParams \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite "$IMAGE_PATH" | logstdout
+      runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
     fi
 
     if [[ $UNPAPER == 1 ]]; then
