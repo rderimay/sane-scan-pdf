@@ -99,11 +99,10 @@ logstdout()
 runconstrained()
 {
   if [[ -x "$(command -v sem)" ]]; then
-    ### arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
+    arg=$(echo "$@" | sed -E 's/([\(\)])/\\\1/g')  # Escaping parenthesis, otherwise the following will fail
 
     # use up to 75% of the cores available
-    ### sem --jobs 75% --id scan_postprocessing --fg "$arg"
-    sem --jobs 75% --id scan_postprocessing --fg $arg
+    sem --jobs 75% --id scan_postprocessing --fg "$arg"
   else
     "$@"
   fi
