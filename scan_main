@@ -348,15 +348,27 @@ else
 fi
 
 if [[ ! -z "$IM_BRIGHTNESS_CONTRAST" ]]; then
-  params="$params --im-brightness-contrast \"$IM_BRIGHTNESS_CONTRAST\""
+  if [[ $IM_BRIGHTNESS_CONTRAST =~ ^[+-]?[0-9]{1,3}((x[+-]?[0-9]{1,3})\%?)?$ ]]; then
+    params="$params --im-brightness-contrast \"$IM_BRIGHTNESS_CONTRAST\""
+  else
+    echo >&2 'Warning: invalid `--im-brightness-contrast` parameter. Ignoring it.'
+  fi
 fi
 
 if [[ ! -z "$IM_MODULATE" ]]; then
-  params="$params --im-modulate \"$IM_MODULATE\""
+  if [[ $IM_MODULATE =~ ^[0-9]{0,3}(,[0-9]{0,3}(,[0-9]{0,3})?)?$ ]]; then
+    params="$params --im-modulate \"$IM_MODULATE\""
+  else
+    echo >&2 'Warning: invalid `--im-modulate` parameter. Ignoring it.'
+  fi
 fi
 
 if [[ ! -z "$IM_LEVEL" ]]; then
-  params="$params --im-level \"$IM_LEVEL\""
+  if [[ $IM_LEVEL =~ ^[0-9]{1,6}\%?(,[0-9]{1,6}\%?(,[0-9]{1,2}(\.[0-9]{1,5})?)?)?$ ]]; then
+    params="$params --im-level \"$IM_LEVEL\""
+  else
+    echo >&2 'Warning: invalid `--im-level` parameter. Ignoring it.'
+  fi
 fi
 
 if [[ "$PGWIDTHIN" != "" ]]; then
