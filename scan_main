@@ -105,11 +105,11 @@ while [[ $# > 0 ]]; do
 
   --full-optimization) FULL_OPTIMIZATION=1 ;;
 
-  --im_brightness-contrast) shift; IM_BRIGHTNESS_CONTRAST=$1 ;;
+  --im-brightness-contrast) shift; IM_BRIGHTNESS_CONTRAST=$1 ;;
 
-  --im_modulate) shift; IM_MODULATE=$1 ;;
+  --im-modulate) shift; IM_MODULATE=$1 ;;
 
-  --im_level) shift; IM_LEVEL=$1 ;;
+  --im-level) shift; IM_LEVEL=$1 ;;
 
   -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
 
