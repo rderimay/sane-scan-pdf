@@ -36,8 +36,9 @@ VERBOSE=0
 SKIP_EMPTY_PAGES=0
 OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
-BRIGHTNESS_CONTRAST=
-LEVEL=
+IM_BRIGHTNESS_CONTRAST=
+IM_MODULATE=
+IM_LEVEL=
 SOURCE=""
 
 if [[ $DEBUG == 1 ]]; then
@@ -104,9 +105,11 @@ while [[ $# > 0 ]]; do
 
   --full-optimization) FULL_OPTIMIZATION=1 ;;
 
-  --brightness-contrast) shift; BRIGHTNESS_CONTRAST=$1 ;;
+  --im_brightness-contrast) shift; IM_BRIGHTNESS_CONTRAST=$1 ;;
 
-  --level) shift; LEVEL=$1 ;;
+  --im_modulate) shift; IM_MODULATE=$1 ;;
+
+  --im_level) shift; IM_LEVEL=$1 ;;
 
   -o|--output) shift; USEOUTPUT=1; OUTPUT="$1" ;;
 
@@ -344,12 +347,16 @@ else
   fi
 fi
 
-if [[ ! -z "$BRIGHTNESS_CONTRAST" ]]; then
-  params="$params --brightness-contrast \"$BRIGHTNESS_CONTRAST\""
+if [[ ! -z "$IM_BRIGHTNESS_CONTRAST" ]]; then
+  params="$params --im-brightness-contrast \"$IM_BRIGHTNESS_CONTRAST\""
 fi
 
-if [[ ! -z "$LEVEL" ]]; then
-  params="$params --level \"$LEVEL\""
+if [[ ! -z "$IM_MODULATE" ]]; then
+  params="$params --im-modulate \"$IM_MODULATE\""
+fi
+
+if [[ ! -z "$IM_LEVEL" ]]; then
+  params="$params --im-level \"$IM_LEVEL\""
 fi
 
 if [[ "$PGWIDTHIN" != "" ]]; then
