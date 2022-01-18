@@ -43,10 +43,10 @@ SOURCE=""
 
 if [[ $DEBUG == 1 ]]; then
   TMP_DIR=$(mktemp -d -p "/home/pi/scans" scan.XXXXXXXXXX)
-  TMP_NOHUP_LOG=$(mktemp -d -p "/home/pi/scans" nohup.scan.XXXXXXXXXX.log)
+  TMP_NOHUP_LOG=$(mktemp -p "/home/pi/scans" scan.nohup.XXXXXXXXXX.log)
 else
   TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
-  TMP_NOHUP_LOG=$(mktemp -d -p "" nohup.scan.XXXXXXXXXX.log)
+  TMP_NOHUP_LOG=$(mktemp -p "" scan.nohup.XXXXXXXXXX.log)
 fi
 
 cleanup()
