@@ -43,8 +43,10 @@ SOURCE=""
 
 if [[ $DEBUG == 1 ]]; then
   TMP_DIR=$(mktemp -d -p "/home/pi/scans" scan.XXXXXXXXXX)
+  TMP_NOHUP_LOG=$(mktemp -d -p "/home/pi/scans" nohup.scan.XXXXXXXXXX.log)
 else
   TMP_DIR=$(mktemp -d -p "" scan.XXXXXXXXXX)
+  TMP_NOHUP_LOG=$(mktemp -d -p "" nohup.scan.XXXXXXXXXX.log)
 fi
 
 cleanup()
@@ -394,7 +396,7 @@ if [[ $USEARRAY == 1 ]]; then
 
   if [[ $DEFER_POSTPROCESSING == 1 ]]; then
     # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
-    sem --jobs 1 --id scan_main --bg nohup $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" > /tmp/nohup.out 2>&1 &
+    sem --jobs 1 --id scan_main --bg nohup $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT" > $TMP_NOHUP_LOG 2>&1 &
   else
     eval $SCRIPT $params --input-dir "$TMP_DIR" --outputlist "$OUTPUT"
   fi
@@ -405,7 +407,7 @@ else
 
   if [[ $DEFER_POSTPROCESSING == 1 ]]; then
     # The following wil act as a mutex, meaning it will start only one postprocessing job at once and return
-    sem --jobs 1 --id scan_main --bg nohup $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" > /tmp/nohup.out 2>&1 &
+    sem --jobs 1 --id scan_main --bg nohup $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT" > $TMP_NOHUP_LOG 2>&1 &
   else
     eval $SCRIPT $params --input-dir "$TMP_DIR" --output "$OUTPUT"
   fi
