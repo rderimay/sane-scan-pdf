@@ -163,7 +163,7 @@ for x in ${ppmfiles[@]}; do
     GRAYSCALE_CONVERSION=0
 
     if [[ $AUTO_COLOR == 1 ]]; then
-      COLOR_PART=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% $imParams -dither FloydSteinberg -colors 64 -colorspace HSB -channel S -separate +channel -range-threshold 10%,90%,10%,90% -format "%[fx:100*mean] " info:) || COLOR_PART=100
+      COLOR_PART=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% $imParams -dither FloydSteinberg -colors 64 -colorspace HSB -channel S -separate +channel -black-threshold 10% -white-threshold 90% -format "%[fx:100*mean] " info:) || COLOR_PART=100
       log "$IMAGE_PATH has COLOR_PART% color"
 
       if [[ $(echo "$COLOR_PART < 0.2" | bc -l) == 1 ]]; then
