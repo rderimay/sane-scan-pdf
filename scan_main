@@ -34,6 +34,7 @@ DESKEW=0
 DRIVER_OPTION=
 VERBOSE=0
 SKIP_EMPTY_PAGES=0
+AUTO_COLOR=0
 OPTIMIZE_IMAGES=0
 FULL_OPTIMIZATION=0
 IM_BRIGHTNESS_CONTRAST=
@@ -102,6 +103,8 @@ while [[ $# > 0 ]]; do
   --language) shift; LANGUAGE=$1 ;;
 
   --skip-empty-pages) SKIP_EMPTY_PAGES=1 ;;
+
+  --auto-color) AUTO_COLOR=1 ;;
 
   --optimize-images) OPTIMIZE_IMAGES=1 ;;
 
@@ -328,13 +331,22 @@ if [[ $SEARCHABLE == 1 ]]; then
   params="$params --ocr --language $LANGUAGE"
 fi
 
-if [[ $SKIP_EMPTY_PAGES == 1 && ! -x "$(command -v bc)" ]]; then
-  echo >&2 'Warning: `--skip-empty-pages` specified, but `bc` not available. Disabling empty page detection.'
-  SKIP_EMPTY_PAGES=0
+if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
+  if [[ ! -x "$(command -v bc)" ]]; then
+    echo >&2 'Warning: `--skip-empty-pages` specified, but `bc` not available. Disabling empty page detection.'
+    SKIP_EMPTY_PAGES=0
+  else
+    params="$params --skip-empty-pages"
+  fi
 fi
 
-if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
-  params="$params --skip-empty-pages"
+if [[ $AUTO_COLOR == 1 ]]; then
+  if [[ "$MODE" != "Color" ]]; then
+    echo >&2 'Warning: `--auto-color` specified, but `--mode` is not set to `Color`. Disabling auto-color.'
+    AUTO_COLOR=0
+  else
+    params="$params --auto-color"
+  fi
 fi
 
 if [[ $OPTIMIZE_IMAGES == 1 ]]; then
