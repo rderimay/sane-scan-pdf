@@ -341,7 +341,7 @@ if [[ $SKIP_EMPTY_PAGES == 1 ]]; then
 fi
 
 if [[ $AUTO_COLOR == 1 ]]; then
-  if [[ "$MODE" != "Color" ]]; then
+  if [[ ! -z "$MODE" && "$MODE" != "--mode 'Color'" ]]; then
     echo >&2 'Warning: `--auto-color` specified, but `--mode` is not set to `Color`. Disabling auto-color.'
     AUTO_COLOR=0
   else
