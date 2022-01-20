@@ -164,7 +164,7 @@ for x in ${ppmfiles[@]}; do
 
     if [[ $AUTO_COLOR == 1 ]]; then
       COLOR_PART=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% $imParams -dither FloydSteinberg -colors 64 -colorspace HSB -channel S -separate +channel -black-threshold 10% -white-threshold 90% -format "%[fx:100*mean] " info:) || COLOR_PART=100
-      log "$IMAGE_PATH has COLOR_PART% color"
+      log "$IMAGE_PATH has $COLOR_PART% color"
 
       if [[ $(echo "$COLOR_PART < 0.2" | bc -l) == 1 ]]; then
         GRAYSCALE_CONVERSION="-type Grayscale"
