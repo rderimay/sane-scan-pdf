@@ -160,40 +160,36 @@ for x in ${ppmfiles[@]}; do
   if [[ $SKIP_EMPTY_PAGES == 1 && $(echo "$PERCENTAGE_WHITE > 99.8" | bc -l) == 1 ]]; then
     log "Skipping empty page $IMAGE_FILE with white percentage $PERCENTAGE_WHITE"
   else
-    GRAYSCALE_CONVERSION=0
+    case "$OPTIMIZATION" in
+      std)
+        log "Applying optimization script \"$OPTIMIZATION\" to image data..."
 
+        log "convert $IMAGE_PATH $imParams -level 8%,90% -fuzz 8% -fill white -opaque \"rgb(255, 255, 255)\" $IMAGE_PATH"
+        runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $IMAGE_PATH | logstdout
+        ;;
+
+      full)
+        log "Applying optimization script \"$OPTIMIZATION\" to image data..."
+
+        log "convert $IMAGE_PATH $imParams \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH"
+        runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $IMAGE_PATH | logstdout
+        ;;
+
+      *)
+        log "Applying no optimization script to image data..."
+        ;;
+    esac
+
+    IS_GRAYSCALE=0
     if [[ $AUTO_COLOR == 1 ]]; then
       COLOR_PART=$(convert "$IMAGE_PATH" -resize 20% -shave 4%x4% $imParams -dither FloydSteinberg -colors 64 -colorspace HSB -channel S -separate +channel -black-threshold 10% -white-threshold 90% -format "%[fx:100*mean] " info:) || COLOR_PART=100
       log "$IMAGE_PATH has $COLOR_PART% color"
 
       if [[ $(echo "$COLOR_PART < 0.2" | bc -l) == 1 ]]; then
-        GRAYSCALE_CONVERSION="-type Grayscale"
+        log "convert $IMAGE_PATH -colorspace Gray $IMAGE_PATH"
+        runconstrained $TIMEVERBOSE convert $IMAGE_PATH -colorspace Gray $IMAGE_PATH | logstdout
       fi
     fi
-
-    case "$OPTIMIZATION" in
-
-      std)
-        log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-        log "convert $IMAGE_PATH $imParams -level 8%,90% -fuzz 8% -fill white -opaque \"rgb(255, 255, 255)\" $GRAYSCALE_CONVERSION $IMAGE_PATH"
-
-        runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams -level 8%,90% -fuzz 8% -fill white -opaque "rgb(255, 255, 255)" $GRAYSCALE_CONVERSION $IMAGE_PATH | logstdout
-        ;;
-
-      full)
-        log "Applying optimization script \"$OPTIMIZATION\" to image data..."
-        log "convert $IMAGE_PATH $imParams \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $GRAYSCALE_CONVERSION $IMAGE_PATH"
-
-        runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams \( +clone -lat ${RESOLUTION}x${RESOLUTION}-10% -threshold 96% \) -compose lighten -composite $GRAYSCALE_CONVERSION $IMAGE_PATH | logstdout
-        ;;
-
-      *)
-        log "Applying no optimization script to image data..."
-        log "convert $IMAGE_PATH $imParams $GRAYSCALE_CONVERSION $IMAGE_PATH"
-
-        runconstrained $TIMEVERBOSE convert $IMAGE_PATH $imParams $GRAYSCALE_CONVERSION $IMAGE_PATH | logstdout
-        ;;
-    esac
 
     if [[ $UNPAPER == 1 ]]; then
       log "Applying unpaper post-processing to image data..."
